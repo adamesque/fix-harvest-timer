@@ -115,10 +115,14 @@
 			}
 			footer a {
 				color: #7291A3;
-				text-decoration: none;
+
+				-webkit-transition: color 500ms ease-in-out;
+				-moz-transition: color 500ms ease-in-out;
+				-ie-transition: color 500ms ease-in-out;
+				transition: color 500ms ease-in-out;
 			}
 			footer a:hover {
-				text-decoration: underline;
+				color: #4f98ff;
 			}
 		</style>
 		<script type="text/javascript">
@@ -159,7 +163,7 @@
 		</form>
 		<footer>
 			<hr/>
-			<p>v0.2 &copy; 2011 <a href="http://twitter.com/adamesque">Adam Luikart</a></p>
+			<p>v0.2 &copy; 2011 <a href="http://twitter.com/adamesque">Adam Luikart</a>. Is it breaked? Let me know <a href="https://github.com/adamesque/fix-harvest-timer/issues">here</a>!</p>
 		</footer>
 		<script>
 			//(function () {
