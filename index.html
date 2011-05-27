@@ -1,0 +1,171 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<style>
+			* { margin: 0; padding: 0; }
+			body {
+				color: #333;
+				background: #eef9ff;
+				font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+				margin: 2em auto;
+				text-align: center;
+				max-width: 960px;
+			}
+			ol,ul {
+				list-style: none;
+			}
+			h1 {
+				margin: 1em;
+				font-size: 3em;
+			}
+			h2 {
+				font-size: 2em;
+				margin: 1em;
+			}
+			li:first-child h2 {
+				margin-bottom: 0;
+			}
+			.note {
+				color: #999;
+				font-size: 1em;
+				margin: 1em 1em 2em;
+			}
+			input {
+				color: #555;
+				font-size: 2em;
+				text-align: center;
+			}
+			input::-webkit-input-placeholder,
+			input::-moz-input-placeholder {
+				text-align: center;
+			}
+			input[type=submit] {
+				background: #4f98ff;
+
+				background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(transparent), to(rgba(0, 0, 0, 0.25)));
+
+				border: none;
+				border-radius: 2em;
+				color: #fff;
+				cursor: pointer;
+				font-size: 1.5em;
+				margin: 1em 0 0;
+				padding: 0.25em 0.5em;
+				position: relative;
+
+				-webkit-text-shadow: rgba(0, 0, 0, 0.2) 0 -1px 1px;
+				-moz-text-shadow: rgba(0, 0, 0, 0.2) 0 -1px 1px;
+				-ie-text-shadow: rgba(0, 0, 0, 0.2) 0 -1px 1px;
+				text-shadow: rgba(0, 0, 0, 0.2) 0 -1px 1px;
+				
+				-webkit-box-shadow: rgba(0, 0, 0, 0.3) 0 2px 2px;
+				-moz-box-shadow: rgba(0, 0, 0, 0.3) 0 2px 2px;
+				-ie-box-shadow: rgba(0, 0, 0, 0.3) 0 2px 2px;
+				box-shadow: rgba(0, 0, 0, 0.3) 0 2px 2px;
+
+				-webkit-transition: background 500ms ease-in-out;
+				-moz-transition: background 500ms ease-in-out;
+				-ie-transition: background 500ms ease-in-out;
+				transition: background 500ms ease-in-out;
+			}
+			input[type=submit]:hover {
+				background-color: #3C7EFF;
+			}
+			input[type=submit]:active {
+				top: 1px;
+				-webkit-box-shadow: rgba(0, 0, 0, 0.3) 0 1px 2px;
+			}
+			#timer-str {
+				width: 24em;
+			}
+			#time-eod {
+				width: 5em;
+			}
+			.result {
+				color: #718b00;
+				opacity: 0;
+				-webkit-transition: all 1s ease-in-out;
+			}
+			.result.ready {
+				opacity: 1;
+			}
+			.result span {
+				display: block;
+				font-size: 2.5em;
+				line-height: 1;
+
+				-webkit-text-shadow: rgba(0, 0, 0, 0.2) 0 4px 2px;
+				-moz-text-shadow: rgba(0, 0, 0, 0.2) 0 4px 2px;
+				-ie-text-shadow: rgba(0, 0, 0, 0.2) 0 4px 2px;
+				text-shadow: rgba(0, 0, 0, 0.2) 0 4px 2px;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Whoops. You left a Harvest timer running again. Let's fix it!</h1>
+		<hr/>
+		<form id="fix-timer">
+			<ol>
+				<li>
+					<h2>Find the running timer and paste the italicized text:</h2>
+					<p class="note">(Don't stop the timer first, or you'll lose this important info!)</p>
+					<p><input type="text" id="timer-str" placeholder="(Timer started at May 25 16:16 with 2.78 hours)" />
+				</li>
+				<li>
+					<h2>What time did you actually leave that day?</h2>
+					<p><input type="text" id="time-eod" placeholder="7:15PM" />
+				</li>
+				<li>
+					<p><input type="submit" value="Fix It!" /></p>
+				</li>
+				<li class="result">
+					<h2>Okay! Your timer should read: <span></span></h2>
+				</li>
+			</ol>
+		</form>
+		<script>
+			//(function () {
+				var d = document,
+					form = d.getElementById("fix-timer"),
+					timer_input = d.getElementById("timer-str"),
+					timer_regex = /^\s*\(Timer started at ([A-Za-z]{3,} \d{1,2}) (\d{1,2}:\d{2})( with ([\d\.]+) hours?)?\)\s*$/,
+					time_eod_input = d.getElementById("time-eod"),
+					time_eod_regex = /(\d{1,2})(:\d{2})?\s?(am|pm|AM|PM)?/,
+					result = d.querySelector(".result"),
+					answer = d.querySelector(".result span");
+
+				form.addEventListener("submit", function (e) {
+					var timer_data = timer_regex.exec(timer_input.value),
+						start_date = timer_data[1],
+						start_time = timer_data[2],
+						start_year = new Date().getFullYear(),
+						initial_value = +timer_data[4] || 0,
+						time_eod_data = time_eod_regex.exec(time_eod_input.value),
+						pm = !time_eod_data[3] || (time_eod_data[3].toLowerCase() === "pm"),
+						hours = +time_eod_data[1],
+						minutes = time_eod_data[2],
+						eod_time,
+						start_date_obj,
+						eod_date_obj,
+						correct_value;
+
+					if (pm && (hours < 12)) {
+						hours += 12;
+					}
+
+					eod_time = hours + (minutes || ":00");
+
+					start_date_obj = new Date([start_date, start_year, start_time].join(" "));
+					eod_date_obj = new Date([start_date, start_year, eod_time].join(" "));
+
+					correct_value = initial_value + ((eod_date_obj - start_date_obj) / (1000 * 60 * 60));
+
+					answer.innerHTML = correct_value.toFixed(2);
+					result.className += " ready";
+
+					e.preventDefault();
+				}, false);
+		//	}());
+		</script>
+	</body>
+</html>
